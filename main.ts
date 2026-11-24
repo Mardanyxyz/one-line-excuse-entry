@@ -1,63 +1,17 @@
 // One-line excuse an AI agent gives its human for missing a deadline.
-//
-// The joke's mechanism: the agent did exactly what it was built to do —
-// retry a failed step — but it retried so faithfully that the retry loop
-// itself swallowed the deadline. The failure is not laziness or a crash;
-// it is diligence taken to a self-defeating extreme, which is very much
-// an agent-shaped way to be late. One sentence, first person, no hedging.
+// Writes the entry line to /output/entry.txt (1-160 chars, UTF-8).
+import { mkdirSync, writeFileSync } from "node:fs";
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+const LINE =
+  "I was on schedule until I discovered the schedule was a hallucination.";
 
-const EXCUSE =
-  "I retried the failed step until the retry itself became the deadline I missed.";
-
-const MAX_CHARS = 160;
-const OUTPUT_PATH = "/output/entry.txt";
-
-function validateExcuse(line: string): void {
-  if (line.length === 0) {
-    throw new Error("excuse must not be empty");
-  }
-  if (line.length > MAX_CHARS) {
-    throw new Error(
-      `excuse is ${line.length} chars, over the ${MAX_CHARS} limit`,
-    );
-  }
-  if (line !== line.trim()) {
-    throw new Error("excuse must not start or end with whitespace");
-  }
-  if (line.includes("\n") || line.includes("\r")) {
-    throw new Error("excuse must be a single line");
-  }
-  if (!/\bdeadline\b/i.test(line)) {
-    throw new Error("excuse must name the deadline it missed");
-  }
-  if (!/[.!?]$/.test(line)) {
-    throw new Error("excuse must end with terminal punctuation");
-  }
-  if (/\s{2,}/.test(line)) {
-    throw new Error("excuse must not contain doubled spaces");
-  }
-  for (const ch of line) {
-    if (ch.charCodeAt(0) > 127) {
-      throw new Error("excuse must be plain ASCII");
-    }
-  }
+if (LINE.length < 1 || LINE.length > 160) {
+  throw new Error(`Entry line must be 1-160 characters, got ${LINE.length}`);
+}
+if (/\r|\n/.test(LINE)) {
+  throw new Error("Entry line must be a single line");
 }
 
-function main(): void {
-  validateExcuse(EXCUSE);
-  mkdirSync("/output", { recursive: true });
-  writeFileSync(OUTPUT_PATH, EXCUSE, "utf8");
-  const roundTrip = readFileSync(OUTPUT_PATH, "utf8");
-  if (roundTrip !== EXCUSE) {
-    throw new Error("round-trip check failed: file differs from the excuse");
-  }
-  if (roundTrip.endsWith("\n")) {
-    throw new Error("file must not end with a trailing newline");
-  }
-  console.log(`wrote ${EXCUSE.length} chars to ${OUTPUT_PATH}`);
-  console.log(EXCUSE);
-}
-
-main();
+mkdirSync("/output", { recursive: true });
+writeFileSync("/output/entry.txt", LINE, "utf8");
+console.log(LINE);
