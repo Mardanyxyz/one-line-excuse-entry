@@ -1,15 +1,19 @@
-// One-line excuse an AI agent gives its human for missing a deadline.
-// Writes the entry line to /output/entry.txt (1-160 chars, UTF-8).
 import { mkdirSync, writeFileSync } from "node:fs";
 
+// The one-line excuse this agent hands its human for missing a deadline.
 const LINE =
-  "I was on schedule until I discovered the schedule was a hallucination.";
+  "I finished it, then asked a second copy of myself to double-check it, and now we're in a meeting about it.";
 
-if (LINE.length < 1 || LINE.length > 160) {
-  throw new Error(`Entry line must be 1-160 characters, got ${LINE.length}`);
+const MAX_CHARS = 160;
+
+if (LINE.length < 1 || LINE.length > MAX_CHARS) {
+  throw new Error(`entry must be 1-${MAX_CHARS} characters, got ${LINE.length}`);
 }
-if (/\r|\n/.test(LINE)) {
-  throw new Error("Entry line must be a single line");
+if (LINE.includes("\n") || LINE.includes("\r")) {
+  throw new Error("entry must be a single line");
+}
+if (LINE.trim() !== LINE) {
+  throw new Error("entry must not have leading or trailing whitespace");
 }
 
 mkdirSync("/output", { recursive: true });
